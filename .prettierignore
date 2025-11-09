@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+
+# Next.js
+.next
+out
+
+# Build artifacts
+build
+dist
+coverage
+
+# Testing
+.turbo
+
+# Environment
+.env
+.env*.local
+
+# Misc
+.DS_Store
+*.log
+*.tsbuildinfo
+
+# Package manager
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
