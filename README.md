@@ -30,7 +30,7 @@ A community-driven web application for sharing, discovering, and referencing AI 
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - npm or pnpm
 
 ### Installation

@@ -1,5 +1,11 @@
 import Image from "next/image";
 
+/**
+ * Home page component displaying a coming soon message
+ * Features hero logo, project tagline, and animated status text
+ *
+ * @returns {JSX.Element} The coming soon landing page
+ */
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-zinc-950 to-zinc-900 px-4">
@@ -14,7 +20,7 @@ export default function Home() {
           A community-driven platform for sharing, discovering, and referencing AI prompts.
         </p>
 
-        {/* Coming Soon Badge */}
+        {/* Coming Soon Text */}
         <p className="animate-pulse text-sm font-medium tracking-wider text-zinc-500">
           COMING SOON...
         </p>
