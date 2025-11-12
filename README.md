@@ -33,6 +33,13 @@ A community-driven web application for sharing, discovering, and referencing AI 
 - Node.js 20+
 - npm or pnpm
 
+### Browser Support
+
+- Chrome 111+
+- Firefox 113+
+- Safari 15.4+
+- Edge 111+
+
 ### Installation
 
 1. Clone the repository:
