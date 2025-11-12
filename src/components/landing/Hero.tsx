@@ -19,7 +19,7 @@ export default function Hero() {
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="relative h-72 w-72 sm:h-92 sm:w-92"
+          className="relative h-72 w-72 sm:h-96 sm:w-96"
         >
           <Image
             src="/landing.png"

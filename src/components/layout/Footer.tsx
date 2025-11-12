@@ -17,8 +17,8 @@ export default function Footer() {
               Made with <span className="animate-pulse text-red-500">☕</span> -{" "}
               <Link
                 href="https://x.com/shrvansudhakara"
-                // target="_blank"
-                // rel="noopener noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="hover:text-foreground font-medium transition-colors"
               >
                 Shrvan Sudhakara
