@@ -34,7 +34,20 @@ export const signUpSchema = z.object({
  * Validates user login credentials
  */
 export const signInSchema = z.object({
-  emailOrUsername: z.string().min(1, "Email or username is required"),
+  emailOrUsername: z
+    .string()
+    .min(1, "Email or username is required")
+    .refine((val) => {
+      const hasAt = val.includes("@");
+
+      if (hasAt) {
+        // Must be a valid email
+        return z.string().email().safeParse(val).success;
+      } else {
+        // Must be a valid username (same rules as signup)
+        return /^[a-z0-9._-]+$/.test(val);
+      }
+    }, "Must be a valid email or username"),
   password: z.string().min(1, "Password is required"),
 });
 
