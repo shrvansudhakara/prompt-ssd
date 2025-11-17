@@ -42,7 +42,7 @@ export const signInSchema = z.object({
 
       if (hasAt) {
         // Must be a valid email
-        return z.string().email().safeParse(val).success;
+        return z.email().safeParse(val).success;
       } else {
         // Must be a valid username (same rules as signup)
         return /^[a-z0-9._-]+$/.test(val);
