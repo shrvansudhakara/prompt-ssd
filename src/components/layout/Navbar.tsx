@@ -30,13 +30,17 @@ export default function Navbar() {
 
         {/* Auth Buttons */}
         <div className="flex items-center space-x-4">
-          <Button
-            variant="outline"
-            className="border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white"
-          >
-            Sign In
-          </Button>
-          <Button>Sign Up</Button>
+          <Link href="/login">
+            <Button
+              variant="outline"
+              className="border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white"
+            >
+              Sign In
+            </Button>
+          </Link>
+          <Link href="/signup">
+            <Button>Sign Up</Button>
+          </Link>
         </div>
       </div>
     </motion.nav>
