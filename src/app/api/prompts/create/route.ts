@@ -2,6 +2,8 @@ import { db } from "@/db";
 import { prompt } from "@/db/schema";
 import { createPromptSchema } from "@/lib/validations/prompt-schemas";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth/auth";
+import { headers } from "next/headers";
 
 /**
  * POST /api/prompts/create
@@ -21,11 +23,14 @@ export async function POST(request: NextRequest) {
     }
 
     const { title, description, content, imageUrl, videoUrl } = validation.data;
-    const { userId } = body;
 
-    if (!userId) {
-      return NextResponse.json({ error: "User ID is required" }, { status: 401 });
+    // Get userId from authenticated session, not from request body
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = session.user.id;
 
     // Create prompt
     const [newPrompt] = await db

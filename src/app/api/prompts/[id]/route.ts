@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
+import { UTApi } from "uploadthing/server";
 
 /**
  * PATCH /api/prompts/[id]
@@ -45,6 +46,29 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Delete old files if they're being replaced
+    const filesToDelete: string[] = [];
+
+    if (existingPrompt.imageUrl && imageUrl !== existingPrompt.imageUrl) {
+      const oldImageKey = extractFileKey(existingPrompt.imageUrl);
+      if (oldImageKey) filesToDelete.push(oldImageKey);
+    }
+
+    if (existingPrompt.videoUrl && videoUrl !== existingPrompt.videoUrl) {
+      const oldVideoKey = extractFileKey(existingPrompt.videoUrl);
+      if (oldVideoKey) filesToDelete.push(oldVideoKey);
+    }
+
+    if (filesToDelete.length > 0) {
+      try {
+        const utapi = new UTApi();
+        await utapi.deleteFiles(filesToDelete);
+      } catch (fileError) {
+        console.error("Failed to delete old files from Uploadthing:", fileError);
+        // Continue with update even if file deletion fails
+      }
+    }
+
     // Update prompt
     await db
       .update(prompt)
@@ -62,6 +86,24 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     console.error("Error updating prompt:", error);
     return NextResponse.json({ error: "Failed to update prompt" }, { status: 500 });
   }
+}
+
+/**
+ * Extract Uploadthing file key from URL
+ * URL format: https://utfs.io/f/{fileKey}
+ */
+function extractFileKey(url: string | null): string | null {
+  if (!url) return null;
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname === "utfs.io") {
+      const parts = urlObj.pathname.split("/");
+      return parts[parts.length - 1];
+    }
+  } catch {
+    return null;
+  }
+  return null;
 }
 
 /**
@@ -93,7 +135,25 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Delete prompt
+    // Delete uploaded files from Uploadthing first
+    const filesToDelete: string[] = [];
+    const imageKey = extractFileKey(existingPrompt.imageUrl);
+    const videoKey = extractFileKey(existingPrompt.videoUrl);
+
+    if (imageKey) filesToDelete.push(imageKey);
+    if (videoKey) filesToDelete.push(videoKey);
+
+    if (filesToDelete.length > 0) {
+      try {
+        const utapi = new UTApi();
+        await utapi.deleteFiles(filesToDelete);
+      } catch (fileError) {
+        console.error("Failed to delete files from Uploadthing:", fileError);
+        // Continue with DB deletion even if file deletion fails
+      }
+    }
+
+    // Delete prompt from database
     await db.delete(prompt).where(eq(prompt.id, id));
 
     return NextResponse.json({ success: true });

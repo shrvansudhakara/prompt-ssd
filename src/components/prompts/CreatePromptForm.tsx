@@ -53,7 +53,7 @@ export default function CreatePromptForm({ userId }: CreatePromptFormProps) {
       const res = await fetch("/api/prompts/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, userId }),
+        body: JSON.stringify(values),
       });
 
       if (!res.ok) {

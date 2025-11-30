@@ -104,13 +104,14 @@ export default function PromptDetail({ prompt, currentUserId }: PromptDetailProp
                       variant="outline"
                       size="icon"
                       onClick={() => router.push(`/prompt/${prompt.id}/edit`)}
+                      aria-label="Edit prompt"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
 
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" aria-label="Delete prompt">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -139,13 +140,20 @@ export default function PromptDetail({ prompt, currentUserId }: PromptDetailProp
 
             {/* Author and date */}
             <div className="text-muted-foreground mt-4 flex items-center gap-4 text-sm">
-              <Link
-                href={`/profile/${prompt.author?.username}`}
-                className="hover:text-foreground flex items-center gap-1 transition-colors"
-              >
-                <User className="h-4 w-4" />
-                <span>{authorName}</span>
-              </Link>
+              {prompt.author?.username ? (
+                <Link
+                  href={`/profile/${prompt.author.username}`}
+                  className="hover:text-foreground flex items-center gap-1 transition-colors"
+                >
+                  <User className="h-4 w-4" />
+                  <span>{authorName}</span>
+                </Link>
+              ) : (
+                <div className="flex items-center gap-1">
+                  <User className="h-4 w-4" />
+                  <span>{authorName}</span>
+                </div>
+              )}
 
               <div className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />

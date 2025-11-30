@@ -63,8 +63,16 @@ export default function EditPromptForm({ prompt }: EditPromptFormProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to update prompt");
+        let message = "Failed to update prompt";
+        try {
+          const data = await res.json();
+          if (typeof data?.error === "string") {
+            message = data.error;
+          }
+        } catch {
+          // Ignore parse errors and keep fallback message
+        }
+        throw new Error(message);
       }
 
       router.push(`/prompt/${prompt.id}`);
