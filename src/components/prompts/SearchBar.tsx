@@ -41,6 +41,13 @@ export default function SearchBar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery, selectedTags]);
 
+  // Sync state when props change (e.g., browser back/forward)
+  useEffect(() => {
+    setQuery(initialQuery);
+    setDebouncedQuery(initialQuery);
+    setSelectedTags(initialSelectedTags);
+  }, [initialQuery, initialSelectedTags]);
+
   const toggleTag = (tagId: string) => {
     const newSelectedTags = selectedTags.includes(tagId)
       ? selectedTags.filter((id) => id !== tagId)

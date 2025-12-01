@@ -61,7 +61,7 @@ function FeedContent() {
     searchParams.get("tags")?.split(",").filter(Boolean) || []
   );
 
-  const { data: tagsData } = useQuery({
+  const { data: tagsData, isError: isTagsError } = useQuery({
     queryKey: ["tags"],
     queryFn: fetchTags,
   });
@@ -114,7 +114,11 @@ function FeedContent() {
       </div>
 
       <div className="mb-8">
-        {tags.length > 0 ? (
+        {isTagsError ? (
+          <div className="py-4 text-center">
+            <p className="text-muted-foreground text-sm">Could not load tag filters.</p>
+          </div>
+        ) : tags.length > 0 ? (
           <SearchBar
             tags={tags}
             initialQuery={searchQuery}
