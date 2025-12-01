@@ -2,7 +2,7 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, Suspense } from "react"; // Added Suspense
 import { useSearchParams } from "next/navigation";
 import PromptCard from "@/components/prompts/PromptCard";
 import SearchBar from "@/components/prompts/SearchBar";
@@ -52,9 +52,9 @@ async function fetchTags() {
   return res.json();
 }
 
-export default function FeedPage() {
+function FeedContent() {
   const { ref, inView } = useInView();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // This hook causes the build error if not suspended
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedTags, setSelectedTags] = useState<string[]>(
@@ -79,7 +79,6 @@ export default function FeedPage() {
       initialPageParam: 1,
     });
 
-  // Scroll to top when filters change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [searchQuery, selectedTags]);
@@ -149,7 +148,6 @@ export default function FeedPage() {
       ) : (
         <>
           <motion.div
-            // FIX: Add key to force remount/re-animation when filters change
             key={`${searchQuery}-${selectedTags.join(",")}`}
             className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
             initial="hidden"
@@ -184,5 +182,20 @@ export default function FeedPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function FeedPage() {
+  return (
+    // The Suspense boundary catches the "useSearchParams" usage inside FeedContent
+    <Suspense
+      fallback={
+        <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <FeedContent />
+    </Suspense>
   );
 }
