@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config({ path: ".env.local", quiet: true });
 
 import { db } from "./index";
-import { user, prompt } from "./schema";
+import { user, prompt, tag, promptTag } from "./schema";
 
 /**
  * Seed script to populate database with test data
@@ -14,7 +14,9 @@ async function seed() {
   try {
     // Clear existing data
     console.log("🗑️  Clearing existing data...");
+    await db.delete(promptTag);
     await db.delete(prompt);
+    await db.delete(tag);
     await db.delete(user);
     console.log("✅ Existing data cleared");
 
@@ -147,6 +149,50 @@ async function seed() {
     ];
 
     await db.insert(prompt).values(testPrompts);
+
+    // Create tags
+    const tagData = [
+      { name: "Coding", slug: "coding" },
+      { name: "Writing", slug: "writing" },
+      { name: "Marketing", slug: "marketing" },
+      { name: "Design", slug: "design" },
+      { name: "Business", slug: "business" },
+      { name: "Education", slug: "education" },
+      { name: "Creative", slug: "creative" },
+      { name: "Data Analysis", slug: "data-analysis" },
+    ];
+
+    const createdTags = await db
+      .insert(tag)
+      .values(
+        tagData.map((t) => ({
+          id: crypto.randomUUID(),
+          name: t.name,
+          slug: t.slug,
+        }))
+      )
+      .returning();
+
+    console.log("✅ Created tags:", createdTags.length);
+
+    // Assign tags to prompts (randomly for demo)
+    const promptTagAssignments = [];
+    const prompts = testPrompts;
+
+    // Assign 2-3 tags to each prompt
+    for (let i = 0; i < prompts.length; i++) {
+      const numTags = Math.floor(Math.random() * 2) + 2; // 2-3 tags
+      const shuffledTags = [...createdTags].sort(() => Math.random() - 0.5);
+
+      for (let j = 0; j < numTags; j++) {
+        promptTagAssignments.push({
+          promptId: prompts[i].id,
+          tagId: shuffledTags[j].id,
+        });
+      }
+    }
+
+    await db.insert(promptTag).values(promptTagAssignments);
 
     console.log("✅ Created test prompts:", testPrompts.length);
     console.log("🎉 Seeding complete!");

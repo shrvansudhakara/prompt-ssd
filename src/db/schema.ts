@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, primaryKey } from "drizzle-orm/pg-core";
 
 /**
  * Users table schema
@@ -112,5 +112,41 @@ export const prompt = pgTable(
   },
   (table) => ({
     userIdIdx: index("prompt_user_id_idx").on(table.userId),
+  })
+);
+
+/**
+ * Tag table schema
+ * Stores reusable tags for categorizing prompts
+ */
+export const tag = pgTable("tag", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  usageCount: integer("usage_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/**
+ * Prompt-Tag junction table schema
+ * Many-to-many relationship between prompts and tags
+ */
+export const promptTag = pgTable(
+  "prompt_tag",
+  {
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.promptId, table.tagId] }),
+    promptIdIdx: index("prompt_tag_prompt_id_idx").on(table.promptId),
+    tagIdIdx: index("prompt_tag_tag_id_idx").on(table.tagId),
   })
 );

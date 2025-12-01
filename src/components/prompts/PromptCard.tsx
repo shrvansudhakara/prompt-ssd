@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { ArrowBigUp, Clock, User } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -18,6 +19,7 @@ interface PromptCardProps {
       firstName: string;
       lastName: string | null;
     } | null;
+    tags: Array<{ id: string; name: string; slug: string }>;
   };
 }
 
@@ -38,6 +40,17 @@ export default function PromptCard({ prompt }: PromptCardProps) {
             <p className="text-muted-foreground line-clamp-3">
               {prompt.description || "No description provided"}
             </p>
+
+            {/* Tags */}
+            {prompt.tags.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {prompt.tags.map((tag) => (
+                  <Badge key={tag.id} variant="secondary" className="text-xs">
+                    {tag.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </CardContent>
 
           <CardFooter className="text-muted-foreground flex items-center justify-between text-sm">
