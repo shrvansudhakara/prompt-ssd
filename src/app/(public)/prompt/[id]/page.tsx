@@ -47,5 +47,11 @@ export default async function PromptPage({ params }: PromptPageProps) {
     notFound();
   }
 
-  return <PromptDetail prompt={promptData} currentUserId={session?.user.id} />;
+  return (
+    <PromptDetail
+      prompt={promptData}
+      currentUserId={session?.user.id}
+      isAuthenticated={!!session}
+    />
+  );
 }

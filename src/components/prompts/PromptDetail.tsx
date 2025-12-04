@@ -2,13 +2,15 @@
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowBigUp, Clock, User, Copy, Check } from "lucide-react";
+import { Clock, User, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
+import VoteButtons from "./VoteButtons";
+import SaveButton from "./SaveButton";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,13 +41,18 @@ interface PromptDetailProps {
     } | null;
   };
   currentUserId?: string;
+  isAuthenticated: boolean;
 }
 
 /**
  * Prompt detail component showing full prompt information
  * Includes copy button, author info, and upvote UI
  */
-export default function PromptDetail({ prompt, currentUserId }: PromptDetailProps) {
+export default function PromptDetail({
+  prompt,
+  currentUserId,
+  isAuthenticated,
+}: PromptDetailProps) {
   const [copied, setCopied] = useState(false);
   const router = useRouter();
 
@@ -92,10 +99,13 @@ export default function PromptDetail({ prompt, currentUserId }: PromptDetailProp
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" size="lg" className="flex items-center gap-2">
-                  <ArrowBigUp className="h-5 w-5" />
-                  <span>{prompt.upvotes}</span>
-                </Button>
+                <VoteButtons
+                  promptId={prompt.id}
+                  initialUpvotes={prompt.upvotes}
+                  isAuthenticated={isAuthenticated}
+                />
+
+                <SaveButton promptId={prompt.id} isAuthenticated={isAuthenticated} />
 
                 {/* Show edit/delete only for owner */}
                 {currentUserId === prompt.userId && (

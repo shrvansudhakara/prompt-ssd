@@ -150,3 +150,48 @@ export const promptTag = pgTable(
     tagIdIdx: index("prompt_tag_tag_id_idx").on(table.tagId),
   })
 );
+
+/**
+ * Vote table schema
+ * Stores user votes (upvote/downvote) on prompts
+ */
+export const vote = pgTable(
+  "vote",
+  {
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    voteType: text("vote_type").$type<"up" | "down">().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.promptId, table.userId] }),
+    promptIdIdx: index("vote_prompt_id_idx").on(table.promptId),
+    userIdIdx: index("vote_user_id_idx").on(table.userId),
+  })
+);
+
+/**
+ * Saved Prompt table schema
+ * Stores user's bookmarked/saved prompts
+ */
+export const savedPrompt = pgTable(
+  "saved_prompt",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    savedAt: timestamp("saved_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.promptId] }),
+    userIdIdx: index("saved_prompt_user_id_idx").on(table.userId),
+    promptIdIdx: index("saved_prompt_prompt_id_idx").on(table.promptId),
+  })
+);
