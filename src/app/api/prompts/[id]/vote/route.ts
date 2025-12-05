@@ -35,53 +35,56 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
       // If same vote type, remove the vote (toggle off)
       if (currentVote.voteType === voteType) {
-        await db
-          .delete(vote)
-          .where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
+        await db.transaction(async (tx) => {
+          await tx
+            .delete(vote)
+            .where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
 
-        // Update prompt upvotes count
-        await db
-          .update(prompt)
-          .set({
-            upvotes: sql`${prompt.upvotes} + ${voteType === "up" ? -1 : 1}`,
-          })
-          .where(eq(prompt.id, promptId));
+          await tx
+            .update(prompt)
+            .set({
+              upvotes: sql`${prompt.upvotes} + ${voteType === "up" ? -1 : 1}`,
+            })
+            .where(eq(prompt.id, promptId));
+        });
 
         return NextResponse.json({ voteType: null, message: "Vote removed" });
       }
 
-      // Different vote type, update the vote
-      await db
-        .update(vote)
-        .set({ voteType })
-        .where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
-
-      // Update prompt upvotes: remove old vote effect, add new vote effect
+      // Update vote and adjust count atomically
       const delta = voteType === "up" ? 2 : -2; // Switching from down to up = +2, up to down = -2
-      await db
-        .update(prompt)
-        .set({
-          upvotes: sql`${prompt.upvotes} + ${delta}`,
-        })
-        .where(eq(prompt.id, promptId));
+      await db.transaction(async (tx) => {
+        await tx
+          .update(vote)
+          .set({ voteType })
+          .where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
+
+        await tx
+          .update(prompt)
+          .set({
+            upvotes: sql`${prompt.upvotes} + ${delta}`,
+          })
+          .where(eq(prompt.id, promptId));
+      });
 
       return NextResponse.json({ voteType, message: "Vote updated" });
     }
 
-    // No existing vote, create new one
-    await db.insert(vote).values({
-      promptId,
-      userId: session.user.id,
-      voteType,
-    });
+    // Create vote and update count atomically
+    await db.transaction(async (tx) => {
+      await tx.insert(vote).values({
+        promptId,
+        userId: session.user.id,
+        voteType,
+      });
 
-    // Update prompt upvotes count
-    await db
-      .update(prompt)
-      .set({
-        upvotes: sql`${prompt.upvotes} + ${voteType === "up" ? 1 : -1}`,
-      })
-      .where(eq(prompt.id, promptId));
+      await tx
+        .update(prompt)
+        .set({
+          upvotes: sql`${prompt.upvotes} + ${voteType === "up" ? 1 : -1}`,
+        })
+        .where(eq(prompt.id, promptId));
+    });
 
     return NextResponse.json({ voteType, message: "Vote created" });
   } catch (error) {
@@ -119,16 +122,19 @@ export async function DELETE(
 
     const currentVote = existingVote[0];
 
-    // Delete the vote
-    await db.delete(vote).where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
+    // Delete vote and update count atomically
+    await db.transaction(async (tx) => {
+      await tx
+        .delete(vote)
+        .where(and(eq(vote.promptId, promptId), eq(vote.userId, session.user.id)));
 
-    // Update prompt upvotes count
-    await db
-      .update(prompt)
-      .set({
-        upvotes: sql`${prompt.upvotes} + ${currentVote.voteType === "up" ? -1 : 1}`,
-      })
-      .where(eq(prompt.id, promptId));
+      await tx
+        .update(prompt)
+        .set({
+          upvotes: sql`${prompt.upvotes} + ${currentVote.voteType === "up" ? -1 : 1}`,
+        })
+        .where(eq(prompt.id, promptId));
+    });
 
     return NextResponse.json({ message: "Vote removed" });
   } catch (error) {

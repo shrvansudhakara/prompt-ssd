@@ -67,7 +67,7 @@ export default async function SavedPromptsPage() {
       {savedPrompts.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-muted-foreground">
-            You haven&apost saved any prompts yet. Browse the feed to find prompts to save!
+            You haven&apos;t saved any prompts yet. Browse the feed to find prompts to save!
           </p>
         </div>
       ) : (

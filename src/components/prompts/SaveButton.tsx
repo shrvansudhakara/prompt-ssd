@@ -25,7 +25,7 @@ export default function SaveButton({ promptId, isAuthenticated }: SaveButtonProp
 
     async function fetchSaveStatus() {
       try {
-        const res = await fetch(`/api/prompts/${promptId}/save/status`);
+        const res = await fetch(`/api/prompts/${promptId}/save`);
         if (res.ok) {
           const data = await res.json();
           setIsSaved(data.saved);
@@ -53,7 +53,7 @@ export default function SaveButton({ promptId, isAuthenticated }: SaveButtonProp
     setIsSaved(!isSaved);
 
     try {
-      const method = isSaved ? "DELETE" : "POST";
+      const method = previousSaved ? "DELETE" : "POST";
       const res = await fetch(`/api/prompts/${promptId}/save`, { method });
 
       if (!res.ok) {

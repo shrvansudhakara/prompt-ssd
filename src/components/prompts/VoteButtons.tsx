@@ -89,11 +89,12 @@ export default function VoteButtons({
 
       const data = await res.json();
       setVoteType(data.voteType);
-    } catch (errorl) {
+    } catch (error) {
       // Revert optimistic update on error
       setVoteType(previousVoteType);
       setUpvotes(previousUpvotes);
 
+      console.error("Error voting:", error);
       toast.error("Failed to register vote. Please try again.");
     } finally {
       setIsLoading(false);
