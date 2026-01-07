@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     // Get search and filter params
     const searchQuery = searchParams.get("search") || "";
-    const tagIds = searchParams.get("tags")?.split(",").filter(Boolean) || [];
+    const tagSlugs = searchParams.get("tags")?.split(",").filter(Boolean) || [];
 
     // Build where conditions
     const whereConditions = [];
@@ -32,16 +32,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (tagIds.length > 0) {
+    if (tagSlugs.length > 0) {
       whereConditions.push(
         sql`${prompt.id} IN (
-          SELECT ${promptTag.promptId} 
-          FROM ${promptTag} 
-          WHERE ${promptTag.tagId} IN (${sql.join(
-            tagIds.map((id) => sql`${id}`),
-            sql`, `
-          )})
-        )`
+      SELECT ${promptTag.promptId} 
+      FROM ${promptTag} 
+      INNER JOIN ${tag} ON ${promptTag.tagId} = ${tag.id}
+      WHERE LOWER(${tag.slug}) IN (${sql.join(
+        tagSlugs.map((slug) => sql`${slug.toLowerCase()}`),
+        sql`, `
+      )})
+      GROUP BY ${promptTag.promptId}
+      HAVING COUNT(DISTINCT ${tag.id}) = ${tagSlugs.length}
+    )`
       );
     }
 

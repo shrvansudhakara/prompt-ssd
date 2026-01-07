@@ -28,7 +28,7 @@ export const ourFileRouter = {
     }),
 
   videoUploader: f({
-    video: { maxFileSize: "32MB", maxFileCount: 1 },
+    video: { maxFileSize: "16MB", maxFileCount: 1 },
   })
     .middleware(async () => {
       const session = await auth.api.getSession({

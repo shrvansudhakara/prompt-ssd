@@ -58,7 +58,11 @@ function FeedContent() {
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    searchParams.get("tags")?.split(",").filter(Boolean) || []
+    searchParams
+      .get("tags")
+      ?.split(",")
+      .filter(Boolean)
+      .map((s) => s.toLowerCase()) || []
   );
 
   const { data: tagsData, isError: isTagsError } = useQuery({

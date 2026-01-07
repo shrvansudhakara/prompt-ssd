@@ -48,10 +48,10 @@ export default function SearchBar({
     setSelectedTags(initialSelectedTags);
   }, [initialQuery, initialSelectedTags]);
 
-  const toggleTag = (tagId: string) => {
-    const newSelectedTags = selectedTags.includes(tagId)
-      ? selectedTags.filter((id) => id !== tagId)
-      : [...selectedTags, tagId];
+  const toggleTag = (tagSlug: string) => {
+    const newSelectedTags = selectedTags.includes(tagSlug)
+      ? selectedTags.filter((slug) => slug !== tagSlug)
+      : [...selectedTags, tagSlug];
 
     setSelectedTags(newSelectedTags);
   };
@@ -104,10 +104,10 @@ export default function SearchBar({
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
             <Badge
-              key={tag.id}
-              variant={selectedTags.includes(tag.id) ? "default" : "outline"}
+              key={tag.slug}
+              variant={selectedTags.includes(tag.slug) ? "default" : "outline"}
               className="hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors"
-              onClick={() => toggleTag(tag.id)}
+              onClick={() => toggleTag(tag.slug)}
             >
               {tag.name}
             </Badge>

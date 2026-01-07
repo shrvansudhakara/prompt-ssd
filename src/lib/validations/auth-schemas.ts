@@ -80,8 +80,53 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+/**
+ * Email-only schema for initial signup step
+ */
+export const emailOnlySchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+/**
+ * OTP verification schema
+ */
+export const verifyOTPSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d+$/, "OTP must contain only numbers"),
+});
+
+/**
+ * Complete signup schema - after email verified
+ */
+export const completeSignupSchema = z.object({
+  firstName: z
+    .string()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must not exceed 50 characters"),
+  lastName: z.string().max(50, "Last name must not exceed 50 characters").optional(),
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters")
+    .max(30, "Username must not exceed 30 characters")
+    .regex(
+      /^[a-z0-9._-]+$/,
+      "Username must be lowercase and can only contain letters, numbers, periods, underscores, and hyphens"
+    ),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must not exceed 100 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
+});
+
 // Type inference for TypeScript
 export type SignUpInput = z.infer<typeof signUpSchema>;
 export type SignInInput = z.infer<typeof signInSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+export type EmailOnlyInput = z.infer<typeof emailOnlySchema>;
+export type VerifyOTPInput = z.infer<typeof verifyOTPSchema>;
+export type CompleteSignupInput = z.infer<typeof completeSignupSchema>;

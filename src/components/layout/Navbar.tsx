@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useSession } from "@/lib/auth/auth-client";
+import { useSession, authClient } from "@/lib/auth/auth-client";
 import { LogOut } from "lucide-react";
 
 /**
@@ -15,7 +15,7 @@ export default function Navbar() {
   const { data: session, isPending } = useSession();
 
   const handleSignOut = async () => {
-    await fetch("/api/auth/sign-out", { method: "POST" });
+    await authClient.signOut();
     window.location.href = "/";
   };
 
@@ -44,14 +44,14 @@ export default function Navbar() {
                   <Link href="/feed" className="text-zinc-300 transition-colors hover:text-white">
                     Feed
                   </Link>
+                  <Link href="/create" className="text-zinc-300 transition-colors hover:text-white">
+                    Create
+                  </Link>
                   <Link
                     href="/profile/saved"
                     className="text-zinc-300 transition-colors hover:text-white"
                   >
                     Saved
-                  </Link>
-                  <Link href="/create" className="text-zinc-300 transition-colors hover:text-white">
-                    Create
                   </Link>
                   <Link
                     href="/profile"
