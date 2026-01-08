@@ -195,7 +195,7 @@ function extractFileKey(url: string | null): string | null {
  * Also removes uploaded files from UploadThing.
  *
  * Database cascades handle deletion of:
- * - Tag associations
+ * - Tag associations (after decrementing usage count)
  * - Votes
  * - Saves
  *
@@ -249,7 +249,21 @@ export async function DELETE(
       }
     }
 
-    // Delete prompt from database
+    // Get tags to decrement usage count before deletion
+    const promptTags = await db
+      .select({ tagId: promptTag.tagId })
+      .from(promptTag)
+      .where(eq(promptTag.promptId, id));
+
+    // Decrement usage count for associated tags
+    for (const pt of promptTags) {
+      await db
+        .update(tag)
+        .set({ usageCount: sql`GREATEST(${tag.usageCount} - 1, 0)` })
+        .where(eq(tag.id, pt.tagId));
+    }
+
+    // Delete prompt from database (cascade will delete promptTag associations)
     await db.delete(prompt).where(eq(prompt.id, id));
 
     return NextResponse.json({ success: true });
