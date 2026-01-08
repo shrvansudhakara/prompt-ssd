@@ -4,9 +4,22 @@ import { desc, eq, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * GET /api/prompts
- * Fetches paginated prompts with author info and tags
- * Query params: page (default: 1), limit (default: 9), search, tags (comma-separated IDs)
+ * Fetch paginated prompts with filtering
+ *
+ * Returns a paginated list of prompts with author information and tags.
+ * Supports search across title, description, and content.
+ * Tag filtering uses AND operation (all specified tags must match).
+ *
+ * Query parameters:
+ * - page: Page number (default: 1)
+ * - limit: Items per page (default: 9)
+ * - search: Search term for title/description/content
+ * - tags: Comma-separated tag slugs (AND operation)
+ *
+ * @param request - Request with optional query params
+ * @returns Paginated prompts with author info, tags, and pagination metadata
+ *
+ * @route GET /api/prompts
  */
 export async function GET(request: NextRequest) {
   try {

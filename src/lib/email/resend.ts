@@ -5,6 +5,11 @@ const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@promptssd.com";
 
 /**
  * Send OTP verification email for signup
+ *
+ * @param params - Email parameters
+ * @param params.email - Recipient email address
+ * @param params.otp - 6-digit verification code
+ * @throws Error if email delivery fails
  */
 export async function sendSignupOTP({ email, otp }: { email: string; otp: string }) {
   await resend.emails.send({
@@ -48,6 +53,11 @@ export async function sendSignupOTP({ email, otp }: { email: string; otp: string
 
 /**
  * Send OTP for email change verification
+ *
+ * @param params - Email parameters
+ * @param params.email - New email address to verify
+ * @param params.otp - 6-digit verification code
+ * @throws Error if email delivery fails
  */
 export async function sendEmailChangeOTP({ email, otp }: { email: string; otp: string }) {
   await resend.emails.send({
@@ -91,6 +101,11 @@ export async function sendEmailChangeOTP({ email, otp }: { email: string; otp: s
 
 /**
  * Send OTP for password change verification
+ *
+ * @param params - Email parameters
+ * @param params.email - User's current email address
+ * @param params.otp - 6-digit verification code
+ * @throws Error if email delivery fails
  */
 export async function sendPasswordChangeOTP({ email, otp }: { email: string; otp: string }) {
   await resend.emails.send({

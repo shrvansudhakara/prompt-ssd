@@ -7,8 +7,17 @@ import { headers } from "next/headers";
 import { sql } from "drizzle-orm";
 
 /**
- * POST /api/prompts/create
- * Creates a new prompt with tags
+ * Create a new prompt with tags
+ *
+ * Creates a prompt entry and associates it with tags. Tags are created
+ * if they don't exist (case-insensitive matching), or existing tags are
+ * reused with incremented usage count.
+ *
+ * @param request - Next.js request containing { title, description, content, imageUrl, videoUrl, tagNames }
+ * @returns 201 with promptId on success, 400 on validation error, 401 if unauthorized, 500 on server error
+ * @requires Authentication - User must be logged in
+ *
+ * @route POST /api/prompts/create
  */
 export async function POST(request: NextRequest) {
   try {

@@ -15,8 +15,22 @@ const changePasswordSchema = z.object({
 });
 
 /**
- * POST /api/auth/change-password-with-otp
- * Verify OTP and update user's password
+ * Change user password with OTP verification
+ *
+ * Verifies OTP and updates the user's password. Used for secure password
+ * reset flow. OTP must be valid and not expired.
+ *
+ * Security:
+ * - Requires valid session (user must be logged in)
+ * - OTP verification with rate limiting
+ * - Password hashed with bcrypt (10 rounds)
+ * - Updates credential provider account only
+ *
+ * @param request - Request body containing { otp, newPassword }
+ * @returns 200 on success, 400 on validation/OTP error, 401 if unauthorized, 500 on server error
+ * @requires Authentication - User must be logged in
+ *
+ * @route POST /api/auth/change-password-with-otp
  */
 export async function POST(request: NextRequest) {
   try {

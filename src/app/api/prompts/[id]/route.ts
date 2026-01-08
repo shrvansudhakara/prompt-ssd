@@ -8,8 +8,24 @@ import { headers } from "next/headers";
 import { UTApi } from "uploadthing/server";
 
 /**
- * PATCH /api/prompts/[id]
- * Updates an existing prompt
+ * Update an existing prompt
+ *
+ * Updates prompt content, metadata, and tag associations. Only the prompt owner
+ * can update. Handles file cleanup for replaced images/videos on UploadThing.
+ *
+ * Tag management:
+ * - Decrements usage count for removed tags
+ * - Increments usage count for added tags
+ * - Creates new tags if they don't exist (case-insensitive)
+ *
+ * All operations are atomic using database transactions.
+ *
+ * @param request - Request body containing { title, description, content, imageUrl, videoUrl, tagNames }
+ * @param params - Route params containing prompt id
+ * @returns 200 on success, 400 on validation error, 401 if unauthorized, 403 if not owner, 404 if not found, 500 on server error
+ * @requires Authentication - User must be logged in and own the prompt
+ *
+ * @route PATCH /api/prompts/[id]
  */
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -151,8 +167,12 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 }
 
 /**
- * Extract Uploadthing file key from URL
- * URL format: https://utfs.io/f/{fileKey}
+ * Extract UploadThing file key from URL
+ *
+ * Parses UploadThing URLs to extract the file key for deletion.
+ *
+ * @param url - UploadThing URL (format: https://utfs.io/f/{fileKey})
+ * @returns File key or null if URL is invalid or not from UploadThing
  */
 function extractFileKey(url: string | null): string | null {
   if (!url) return null;
@@ -169,8 +189,22 @@ function extractFileKey(url: string | null): string | null {
 }
 
 /**
- * DELETE /api/prompts/[id]
- * Deletes a prompt
+ * Delete a prompt
+ *
+ * Deletes a prompt and all associated data. Only the prompt owner can delete.
+ * Also removes uploaded files from UploadThing.
+ *
+ * Database cascades handle deletion of:
+ * - Tag associations
+ * - Votes
+ * - Saves
+ *
+ * @param request - Request (no body required)
+ * @param params - Route params containing prompt id
+ * @returns 200 on success, 401 if unauthorized, 403 if not owner, 404 if not found, 500 on server error
+ * @requires Authentication - User must be logged in and own the prompt
+ *
+ * @route DELETE /api/prompts/[id]
  */
 export async function DELETE(
   request: NextRequest,

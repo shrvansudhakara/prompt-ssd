@@ -8,8 +8,17 @@ const verifyOTPSchema = z.object({
 });
 
 /**
- * POST /api/auth/verify-otp
- * Verify OTP for email verification
+ * Verify email OTP for account verification
+ *
+ * Validates a 6-digit OTP against the stored hash with security checks:
+ * - Expiration validation (5 minutes)
+ * - Rate limiting (max 3 attempts)
+ * - Single-use verification
+ *
+ * @param request - Next.js request containing { email, otp }
+ * @returns 200 on success, 400 on validation/verification failure, 500 on server error
+ *
+ * @route POST /api/auth/verify-otp
  */
 export async function POST(request: NextRequest) {
   try {

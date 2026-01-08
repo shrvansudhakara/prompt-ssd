@@ -4,6 +4,15 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 
+/**
+ * Better Auth server-side configuration
+ *
+ * Configures authentication with:
+ * - Email/password authentication
+ * - Username plugin for unique usernames
+ * - Drizzle ORM adapter with PostgreSQL
+ * - Custom user fields (firstName, lastName, username)
+ */
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",

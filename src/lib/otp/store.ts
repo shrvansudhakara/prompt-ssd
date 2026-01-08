@@ -4,7 +4,19 @@ import { eq } from "drizzle-orm";
 import { hashOTP, verifyOTP, generateOTP } from "./generate";
 
 /**
- * Store a new OTP for email verification (expires in 5 minutes)
+ * Store a new OTP for email verification
+ *
+ * Generates a 6-digit OTP, hashes it with bcrypt, and stores it in the database.
+ * Any existing verification records for the email are deleted first.
+ *
+ * @param email - User's email address
+ * @returns The plain text OTP to be sent via email
+ * @throws Database errors if insert/delete operations fail
+ *
+ * @security
+ * - OTP expires in 5 minutes
+ * - OTP is hashed with bcrypt before storage
+ * - Single-use: previous OTPs are invalidated
  */
 export async function storeOTP(email: string): Promise<string> {
   const otp = generateOTP();
@@ -26,7 +38,16 @@ export async function storeOTP(email: string): Promise<string> {
 }
 
 /**
- * Verify OTP (max 3 attempts, expires after 5 minutes)
+ * Verify an OTP against the stored hash
+ *
+ * Validates the OTP with security checks:
+ * - Expiration (5 minutes)
+ * - Rate limiting (max 3 attempts)
+ * - Single-use (deleted after successful verification)
+ *
+ * @param email - User's email address
+ * @param otp - The 6-digit OTP to verify
+ * @returns Object with success status and optional error message
  */
 export async function validateOTP(
   email: string,

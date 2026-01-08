@@ -14,8 +14,22 @@ const updateProfileSchema = z.object({
 });
 
 /**
- * PATCH /api/profile/update
- * Updates user profile information
+ * Update user profile information
+ *
+ * Updates firstName, lastName, username, and email for the authenticated user.
+ * Validates uniqueness of username and email across all users.
+ *
+ * Validation:
+ * - firstName: 1-50 characters (required)
+ * - lastName: up to 50 characters (optional)
+ * - username: 3-30 characters (must be unique)
+ * - email: valid email format (must be unique)
+ *
+ * @param request - Request body containing { firstName, lastName?, username, email }
+ * @returns 200 on success, 400 on validation error, 401 if unauthorized, 409 if username/email taken, 500 on server error
+ * @requires Authentication - User must be logged in
+ *
+ * @route PATCH /api/profile/update
  */
 export async function PATCH(request: NextRequest) {
   try {
