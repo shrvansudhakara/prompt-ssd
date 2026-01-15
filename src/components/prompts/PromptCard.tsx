@@ -29,23 +29,13 @@ interface PromptCardProps {
  */
 export default function PromptCard({ prompt }: PromptCardProps) {
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.3 }}
-      className="h-full" /* <--- ADD THIS CLASS */
-    >
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.3 }} className="h-full">
       <Link href={`/prompt/${prompt.id}`} className="block h-full">
-        {" "}
-        {/* <--- ADD CLASS HERE */}
         <Card className="hover:border-primary flex h-full cursor-pointer flex-col transition-colors">
-          {" "}
-          {/* <--- ADD flex flex-col */}
           <CardHeader>
             <h3 className="line-clamp-2 text-xl font-semibold">{prompt.title}</h3>
           </CardHeader>
           <CardContent className="flex-1">
-            {" "}
-            {/* <--- ADD flex-1 (pushes footer down) */}
             <p className="text-muted-foreground line-clamp-3">
               {prompt.description || "No description provided"}
             </p>
