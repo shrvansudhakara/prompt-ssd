@@ -1,11 +1,13 @@
 import bcrypt from "bcryptjs";
+import { randomInt } from "crypto";
 
 /**
  * Generate a random 6-digit OTP
+ * Security: Uses cryptographically secure random number generator
  * @returns 6-digit numeric string
  */
 export function generateOTP(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  return randomInt(100000, 1000000).toString();
 }
 
 /**
