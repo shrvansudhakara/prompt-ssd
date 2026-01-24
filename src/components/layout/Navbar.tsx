@@ -15,8 +15,12 @@ export default function Navbar() {
   const { data: session, isPending } = useSession();
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    window.location.href = "/";
+    try {
+      await authClient.signOut();
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign-out failed:", error);
+    }
   };
 
   return (
