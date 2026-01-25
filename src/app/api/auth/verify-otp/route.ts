@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { validateOTP } from "@/lib/otp/store";
-
-const verifyOTPSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  otp: z.string().length(6, "OTP must be 6 digits").regex(/^\d+$/, "OTP must be numeric"),
-});
+import { verifyOTPSchema } from "@/lib/validations/auth-schemas";
 
 /**
  * Verify email OTP for account verification
