@@ -59,57 +59,43 @@ export async function POST(request: NextRequest) {
 
     // Handle tags if provided
     if (tagNames && tagNames.length > 0) {
-      const tagIds: string[] = [];
+      await db.transaction(async (tx) => {
+        const tagIds: string[] = [];
 
-      for (const tagName of tagNames) {
-        const trimmedName = tagName.trim();
-        if (!trimmedName) continue;
+        for (const tagName of tagNames) {
+          const trimmedName = tagName.trim();
+          if (!trimmedName) continue;
 
-        // Create case-insensitive slug
-        const slug = trimmedName.toLowerCase().replace(/\s+/g, "-");
+          // Create case-insensitive slug
+          const slug = trimmedName.toLowerCase().replace(/\s+/g, "-");
 
-        // Check if tag exists (case-insensitive)
-        const existingTag = await db
-          .select()
-          .from(tag)
-          .where(sql`LOWER(${tag.slug}) = ${slug}`)
-          .limit(1);
-
-        let tagId: string;
-
-        if (existingTag.length > 0) {
-          // Use existing tag
-          tagId = existingTag[0].id;
-          // Increment usage count
-          await db
-            .update(tag)
-            .set({ usageCount: sql`${tag.usageCount} + 1` })
-            .where(sql`id = ${tagId}`);
-        } else {
-          // Create new tag
-          const [newTag] = await db
+          // Check if tag exists (case-insensitive)
+          const [upsertedTag] = await tx
             .insert(tag)
             .values({
               name: trimmedName,
               slug: slug,
               usageCount: 1,
             })
+            .onConflictDoUpdate({
+              target: tag.slug,
+              set: { usageCount: sql`${tag.usageCount} + 1` },
+            })
             .returning({ id: tag.id });
-          tagId = newTag.id;
+
+          tagIds.push(upsertedTag.id);
         }
 
-        tagIds.push(tagId);
-      }
-
-      // Create prompt-tag associations
-      if (tagIds.length > 0) {
-        await db.insert(promptTag).values(
-          tagIds.map((tagId) => ({
-            promptId: promptId,
-            tagId: tagId,
-          }))
-        );
-      }
+        // Create prompt-tag associations
+        if (tagIds.length > 0) {
+          await tx.insert(promptTag).values(
+            tagIds.map((tagId) => ({
+              promptId: promptId,
+              tagId: tagId,
+            }))
+          );
+        }
+      });
     }
 
     return NextResponse.json({ promptId: newPrompt.id }, { status: 201 });
