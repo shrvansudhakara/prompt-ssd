@@ -1,3 +1,4 @@
+import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
 import { tag } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
@@ -29,11 +30,18 @@ export async function GET() {
 /**
  * POST /api/tags
  * Creates or retrieves a tag by name (case-insensitive)
+ * Requires authentication
  * Expects: { name: string }
  * Returns: { tag: { id, name, slug } }
  */
 export async function POST(request: NextRequest) {
   try {
+    // Authenticate user
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { name } = await request.json();
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
@@ -61,7 +69,7 @@ export async function POST(request: NextRequest) {
       .values({
         name: trimmedName,
         slug: slug,
-        usageCount: 0,
+        usageCount: 1,
       })
       .returning();
 
