@@ -42,6 +42,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
+    // Re-check email availability (prevent TOCTOU race condition)
+    const existingUser = await db.select().from(user).where(eq(user.email, newEmail)).limit(1);
+
+    if (existingUser.length > 0) {
+      return NextResponse.json({ error: "This email is already in use" }, { status: 400 });
+    }
+
     // Update user's email
     await db.update(user).set({ email: newEmail }).where(eq(user.id, session.user.id));
 
