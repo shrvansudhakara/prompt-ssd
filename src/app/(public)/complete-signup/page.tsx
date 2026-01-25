@@ -56,7 +56,6 @@ function CompleteSignupContent() {
         firstName: values.firstName,
         lastName: values.lastName,
         username: values.username,
-        callbackURL: "/profile",
       });
 
       if (error) {
@@ -67,7 +66,6 @@ function CompleteSignupContent() {
       // Clear verification flag
       sessionStorage.removeItem("emailVerified");
 
-      // Redirect handled by callbackURL
       router.push("/feed");
     } catch (err) {
       console.error("Unexpected System Error:", err);
