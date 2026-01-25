@@ -118,11 +118,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         }
 
         // Process new tags
+        const processedSlugs = new Set<string>();
         for (const tagName of tagNames) {
           const trimmed = tagName.trim();
           if (!trimmed) continue;
 
           const slug = trimmed.toLowerCase().replace(/\s+/g, "-");
+
+          // Skip if already processed this slug
+          if (processedSlugs.has(slug)) continue;
+          processedSlugs.add(slug);
 
           // Find or create tag
           let tagRecord = await tx
