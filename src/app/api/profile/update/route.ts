@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { user } from "@/db/schema";
-import { eq, or, and, ne } from "drizzle-orm";
+import { eq, and, ne } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
@@ -10,23 +10,21 @@ const updateProfileSchema = z.object({
   firstName: z.string().min(1).max(50),
   lastName: z.string().max(50).optional(),
   username: z.string().min(3).max(30),
-  email: z.email(),
 });
 
 /**
  * Update user profile information
  *
- * Updates firstName, lastName, username, and email for the authenticated user.
- * Validates uniqueness of username and email across all users.
+ * Updates firstName, lastName, and username for the authenticated user.
+ * Validates uniqueness of username across all users.
  *
  * Validation:
  * - firstName: 1-50 characters (required)
  * - lastName: up to 50 characters (optional)
  * - username: 3-30 characters (must be unique)
- * - email: valid email format (must be unique)
  *
- * @param request - Request body containing { firstName, lastName?, username, email }
- * @returns 200 on success, 400 on validation error, 401 if unauthorized, 409 if username/email taken, 500 on server error
+ * @param request - Request body containing { firstName, lastName?, username }
+ * @returns 200 on success, 400 on validation error, 401 if unauthorized, 409 if username taken, 500 on server error
  * @requires Authentication - User must be logged in
  *
  * @route PATCH /api/profile/update
@@ -48,24 +46,17 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const { firstName, lastName, username, email } = validation.data;
+    const { firstName, lastName, username } = validation.data;
 
     // Check if username or email already taken by another user
     const existingUser = await db
       .select()
       .from(user)
-      .where(
-        and(or(eq(user.username, username), eq(user.email, email)), ne(user.id, session.user.id))
-      )
+      .where(and(eq(user.username, username), ne(user.id, session.user.id)))
       .limit(1);
 
     if (existingUser.length > 0) {
-      if (existingUser[0].username === username) {
-        return NextResponse.json({ error: "Username already taken" }, { status: 409 });
-      }
-      if (existingUser[0].email === email) {
-        return NextResponse.json({ error: "Email already taken" }, { status: 409 });
-      }
+      return NextResponse.json({ error: "Username already taken" }, { status: 409 });
     }
 
     // Update user
@@ -75,7 +66,6 @@ export async function PATCH(request: NextRequest) {
         firstName,
         lastName: lastName || null,
         username,
-        email,
       })
       .where(eq(user.id, session.user.id));
 
