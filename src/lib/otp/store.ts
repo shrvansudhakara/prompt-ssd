@@ -63,6 +63,11 @@ export async function validateOTP(
     return { success: false, error: "No verification found. Please request a new code." };
   }
 
+  // Check if already verified
+  if (record.verified) {
+    return { success: false, error: "This code has already been used." };
+  }
+
   // Check expiration
   if (new Date() > record.expiresAt) {
     await db.delete(emailVerification).where(eq(emailVerification.id, record.id));
@@ -94,8 +99,14 @@ export async function validateOTP(
     }
   }
 
-  // Success - delete the record (single use)
-  await db.delete(emailVerification).where(eq(emailVerification.id, record.id));
+  // Mark as verified
+  await db
+    .update(emailVerification)
+    .set({
+      verified: true,
+      verifiedAt: new Date(),
+    })
+    .where(eq(emailVerification.id, record.id));
 
   return { success: true };
 }

@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { authClient } from "@/lib/auth/auth-client";
 import { completeSignupSchema, type CompleteSignupInput } from "@/lib/validations/auth-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,18 +47,20 @@ function CompleteSignupContent() {
     setError("");
 
     try {
-      // Create account with Better Auth
-      const { error } = await authClient.signUp.email({
-        email,
-        password: values.password,
-        name: `${values.firstName}${values.lastName ? ` ${values.lastName}` : ""}`,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        username: values.username,
+      // Call endpoint that validates verification server-side
+      const response = await fetch("/api/auth/complete-signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          ...values,
+        }),
       });
 
-      if (error) {
-        setError(error.message || "Failed to create account");
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || "Failed to create account");
         return;
       }
 

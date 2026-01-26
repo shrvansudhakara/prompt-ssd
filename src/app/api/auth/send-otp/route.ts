@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
-import { user } from "@/db/schema";
+import { user, emailVerification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { storeOTP } from "@/lib/otp/store";
 import { sendSignupOTP } from "@/lib/email/resend";
 
 const sendOTPSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
 });
 
 /**
@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Delete any old verification records for this email
+    await db.delete(emailVerification).where(eq(emailVerification.email, email));
 
     // Generate and store OTP
     const otp = await storeOTP(email);

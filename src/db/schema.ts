@@ -208,6 +208,8 @@ export const emailVerification = pgTable("email_verification", {
   email: text("email").notNull(),
   otpHash: text("otp_hash").notNull(),
   attempts: integer("attempts").notNull().default(0),
+  verified: boolean("verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at", { mode: "date" }),
   expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
 });
