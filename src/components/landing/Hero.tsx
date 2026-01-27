@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import { useSession } from "@/lib/auth/auth-client";
 
 /**
  * Hero section for the landing page
@@ -11,6 +13,8 @@ import { motion } from "framer-motion";
  * @returns {JSX.Element} The animated hero section
  */
 export default function Hero() {
+  const { data: session, isPending } = useSession();
+
   return (
     <section className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-linear-to-b from-zinc-950 to-zinc-900 px-4">
       <div className="flex max-w-3xl flex-col items-center space-y-6 text-center">
@@ -59,10 +63,16 @@ export default function Hero() {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="flex flex-wrap justify-center gap-3"
         >
-          <Button size="default">Browse Prompts</Button>
-          <Button variant="outline" size="default">
-            Join Community
-          </Button>
+          <Link href="/feed">
+            <Button size="default">Browse Prompts</Button>
+          </Link>
+          {!isPending && !session && (
+            <Link href="/signup">
+              <Button variant="outline" size="default">
+                Join Community
+              </Button>
+            </Link>
+          )}
         </motion.div>
       </div>
     </section>
