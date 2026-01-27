@@ -195,3 +195,21 @@ export const savedPrompt = pgTable(
     promptIdIdx: index("saved_prompt_prompt_id_idx").on(table.promptId),
   })
 );
+
+/**
+ * Email verification table for pre-signup OTP verification
+ * Stores hashed OTPs with expiration and attempt tracking
+ * Security: OTPs are hashed using bcrypt, limited to 3 attempts, expire in 5 minutes
+ */
+export const emailVerification = pgTable("email_verification", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull(),
+  otpHash: text("otp_hash").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  verified: boolean("verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at", { mode: "date" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});

@@ -4,9 +4,22 @@ import { desc, eq, sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
- * GET /api/prompts
- * Fetches paginated prompts with author info and tags
- * Query params: page (default: 1), limit (default: 9), search, tags (comma-separated IDs)
+ * Fetch paginated prompts with filtering
+ *
+ * Returns a paginated list of prompts with author information and tags.
+ * Supports search across title, description, and content.
+ * Tag filtering uses AND operation (all specified tags must match).
+ *
+ * Query parameters:
+ * - page: Page number (default: 1)
+ * - limit: Items per page (default: 9)
+ * - search: Search term for title/description/content
+ * - tags: Comma-separated tag slugs (AND operation)
+ *
+ * @param request - Request with optional query params
+ * @returns Paginated prompts with author info, tags, and pagination metadata
+ *
+ * @route GET /api/prompts
  */
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     // Get search and filter params
     const searchQuery = searchParams.get("search") || "";
-    const tagIds = searchParams.get("tags")?.split(",").filter(Boolean) || [];
+    const tagSlugs = searchParams.get("tags")?.split(",").filter(Boolean) || [];
 
     // Build where conditions
     const whereConditions = [];
@@ -32,16 +45,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (tagIds.length > 0) {
+    if (tagSlugs.length > 0) {
       whereConditions.push(
         sql`${prompt.id} IN (
-          SELECT ${promptTag.promptId} 
-          FROM ${promptTag} 
-          WHERE ${promptTag.tagId} IN (${sql.join(
-            tagIds.map((id) => sql`${id}`),
-            sql`, `
-          )})
-        )`
+      SELECT ${promptTag.promptId} 
+      FROM ${promptTag} 
+      INNER JOIN ${tag} ON ${promptTag.tagId} = ${tag.id}
+      WHERE LOWER(${tag.slug}) IN (${sql.join(
+        tagSlugs.map((slug) => sql`${slug.toLowerCase()}`),
+        sql`, `
+      )})
+      GROUP BY ${promptTag.promptId}
+      HAVING COUNT(DISTINCT ${tag.id}) = ${tagSlugs.length}
+    )`
       );
     }
 

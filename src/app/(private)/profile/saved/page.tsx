@@ -59,9 +59,7 @@ export default async function SavedPromptsPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Saved Prompts</h1>
-        <p className="text-muted-foreground mt-2">
-          Prompts you&apos;ve bookmarked for later reference
-        </p>
+        <p className="text-muted-foreground mt-2">Prompts you&apos;ve bookmarked for reference</p>
       </div>
 
       {savedPrompts.length === 0 ? (

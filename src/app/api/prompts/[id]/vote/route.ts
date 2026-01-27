@@ -5,9 +5,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 
 /**
- * POST /api/prompts/[id]/vote
  * Create or update a vote on a prompt
- * Body: { voteType: "up" | "down" }
+ *
+ * Handles upvote/downvote logic with toggle functionality:
+ * - Same vote type: removes vote (toggle off)
+ * - Different vote type: switches vote and adjusts count by ±2
+ * - No existing vote: creates new vote and adjusts count by ±1
+ *
+ * All operations are atomic using database transactions.
+ *
+ * @param request - Next.js request containing { voteType: "up" | "down" }
+ * @param params - Route params containing prompt id
+ * @returns Vote status and message, 400 on invalid input, 401 if unauthorized, 500 on server error
+ * @requires Authentication - User must be logged in
+ *
+ * @route POST /api/prompts/[id]/vote
  */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

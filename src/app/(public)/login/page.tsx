@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string>("");
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
@@ -34,20 +32,18 @@ export default function LoginPage() {
       ? await authClient.signIn.email({
           email: values.emailOrUsername,
           password: values.password,
-          callbackURL: "/profile",
+          callbackURL: "/feed",
         })
       : await authClient.signIn.username({
           username: values.emailOrUsername,
           password: values.password,
-          callbackURL: "/profile",
+          callbackURL: "/feed",
         });
 
     if (error) {
       setError(error.message || "Invalid credentials");
       return;
     }
-
-    router.push("/profile");
   };
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

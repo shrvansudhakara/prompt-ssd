@@ -95,12 +95,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -201,12 +197,8 @@
           "name": "prompt_user_id_user_id_fk",
           "tableFrom": "prompt",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -278,12 +270,8 @@
           "name": "prompt_tag_prompt_id_prompt_id_fk",
           "tableFrom": "prompt_tag",
           "tableTo": "prompt",
-          "columnsFrom": [
-            "prompt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prompt_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -291,12 +279,8 @@
           "name": "prompt_tag_tag_id_tag_id_fk",
           "tableFrom": "prompt_tag",
           "tableTo": "tag",
-          "columnsFrom": [
-            "tag_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["tag_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -304,10 +288,7 @@
       "compositePrimaryKeys": {
         "prompt_tag_prompt_id_tag_id_pk": {
           "name": "prompt_tag_prompt_id_tag_id_pk",
-          "columns": [
-            "prompt_id",
-            "tag_id"
-          ]
+          "columns": ["prompt_id", "tag_id"]
         }
       },
       "uniqueConstraints": {},
@@ -376,12 +357,8 @@
           "name": "saved_prompt_user_id_user_id_fk",
           "tableFrom": "saved_prompt",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -389,12 +366,8 @@
           "name": "saved_prompt_prompt_id_prompt_id_fk",
           "tableFrom": "saved_prompt",
           "tableTo": "prompt",
-          "columnsFrom": [
-            "prompt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prompt_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -402,10 +375,7 @@
       "compositePrimaryKeys": {
         "saved_prompt_user_id_prompt_id_pk": {
           "name": "saved_prompt_user_id_prompt_id_pk",
-          "columns": [
-            "user_id",
-            "prompt_id"
-          ]
+          "columns": ["user_id", "prompt_id"]
         }
       },
       "uniqueConstraints": {},
@@ -474,12 +444,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -489,9 +455,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -542,16 +506,12 @@
         "tag_name_unique": {
           "name": "tag_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         },
         "tag_slug_unique": {
           "name": "tag_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -633,16 +593,12 @@
         "user_username_unique": {
           "name": "user_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         },
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -767,12 +723,8 @@
           "name": "vote_prompt_id_prompt_id_fk",
           "tableFrom": "vote",
           "tableTo": "prompt",
-          "columnsFrom": [
-            "prompt_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["prompt_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -780,12 +732,8 @@
           "name": "vote_user_id_user_id_fk",
           "tableFrom": "vote",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -793,10 +741,7 @@
       "compositePrimaryKeys": {
         "vote_prompt_id_user_id_pk": {
           "name": "vote_prompt_id_user_id_pk",
-          "columns": [
-            "prompt_id",
-            "user_id"
-          ]
+          "columns": ["prompt_id", "user_id"]
         }
       },
       "uniqueConstraints": {},

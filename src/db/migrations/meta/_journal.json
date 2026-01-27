@@ -8,6 +8,20 @@
       "when": 1764775761222,
       "tag": "0000_grey_spitfire",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1765977074366,
+      "tag": "0001_rare_living_lightning",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1769450687896,
+      "tag": "0002_illegal_celestials",
+      "breakpoints": true
     }
   ]
 }

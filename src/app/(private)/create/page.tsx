@@ -18,11 +18,11 @@ export default async function CreatePromptPage() {
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Create New Prompt</h1>
+        <h1 className="text-3xl font-bold">Create Prompt</h1>
         <p className="text-muted-foreground mt-2">Share your AI prompt with the community</p>
       </div>
 
-      <CreatePromptForm userId={session.user.id} />
+      <CreatePromptForm />
     </div>
   );
 }
