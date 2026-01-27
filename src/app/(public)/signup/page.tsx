@@ -1,11 +1,11 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { authClient } from "@/lib/auth/auth-client";
-import { signUpSchema, type SignUpInput } from "@/lib/validations/auth-schemas";
+import { emailOnlySchema, type EmailOnlyInput } from "@/lib/validations/auth-schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -17,93 +17,51 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
+
 export default function SignUpPage() {
   const router = useRouter();
   const [error, setError] = useState<string>("");
-  const form = useForm<SignUpInput>({
-    resolver: zodResolver(signUpSchema),
+
+  const form = useForm<EmailOnlyInput>({
+    resolver: zodResolver(emailOnlySchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      username: "",
       email: "",
-      password: "",
     },
   });
-  const onSubmit = async (values: SignUpInput) => {
+
+  const onSubmit = async (values: EmailOnlyInput) => {
     setError("");
-    const { error } = await authClient.signUp.email({
-      email: values.email,
-      password: values.password,
-      name: `${values.firstName}${values.lastName ? ` ${values.lastName}` : ""}`,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      username: values.username,
-      callbackURL: "/profile",
-    });
 
-    if (error) {
-      setError(error.message || "Something went wrong");
-      return;
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: values.email }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to send verification code");
+      }
+
+      // Redirect to OTP verification
+      router.push(`/verify-otp?email=${encodeURIComponent(values.email)}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
-
-    router.push("/profile");
   };
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle>Create an account</CardTitle>
-          <CardDescription>Enter your details to get started with PromptSSD</CardDescription>
+          <CardDescription>Enter your email to get started with PromptSSD</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="John" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Last Name <span className="text-muted-foreground">(optional)</span>
-                      </FormLabel>
-                      <FormControl>
-                        <Input placeholder="Doe" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="johndoe" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="email"
@@ -111,21 +69,7 @@ export default function SignUpPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="john@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="email" placeholder="john@example.com" {...field} autoFocus />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -139,7 +83,14 @@ export default function SignUpPage() {
               )}
 
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Creating account..." : "Sign up"}
+                {form.formState.isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending code...
+                  </>
+                ) : (
+                  "Continue"
+                )}
               </Button>
             </form>
           </Form>

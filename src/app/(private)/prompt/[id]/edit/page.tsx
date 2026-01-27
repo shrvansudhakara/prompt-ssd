@@ -1,6 +1,6 @@
 import { db } from "@/db";
-import { prompt } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { prompt, promptTag, tag } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
@@ -26,8 +26,34 @@ export default async function EditPromptPage({ params }: EditPromptPageProps) {
     redirect("/login");
   }
 
-  // Fetch the prompt
-  const [promptData] = await db.select().from(prompt).where(eq(prompt.id, id));
+  // Fetch the prompt with tags
+  const [promptData] = await db
+    .select({
+      id: prompt.id,
+      title: prompt.title,
+      description: prompt.description,
+      content: prompt.content,
+      imageUrl: prompt.imageUrl,
+      videoUrl: prompt.videoUrl,
+      userId: prompt.userId,
+      tags: sql<{ id: string; name: string; slug: string }[]>`
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', ${tag.id},
+              'name', ${tag.name},
+              'slug', ${tag.slug}
+            )
+          ) FILTER (WHERE ${tag.id} IS NOT NULL),
+          '[]'
+        )
+      `,
+    })
+    .from(prompt)
+    .leftJoin(promptTag, eq(prompt.id, promptTag.promptId))
+    .leftJoin(tag, eq(promptTag.tagId, tag.id))
+    .where(eq(prompt.id, id))
+    .groupBy(prompt.id);
 
   if (!promptData) {
     notFound();
