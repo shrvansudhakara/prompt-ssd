@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, primaryKey } from "drizzle-orm/pg-core";
 
 /**
  * Users table schema
@@ -114,3 +114,102 @@ export const prompt = pgTable(
     userIdIdx: index("prompt_user_id_idx").on(table.userId),
   })
 );
+
+/**
+ * Tag table schema
+ * Stores reusable tags for categorizing prompts
+ */
+export const tag = pgTable("tag", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
+  usageCount: integer("usage_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/**
+ * Prompt-Tag junction table schema
+ * Many-to-many relationship between prompts and tags
+ */
+export const promptTag = pgTable(
+  "prompt_tag",
+  {
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.promptId, table.tagId] }),
+    promptIdIdx: index("prompt_tag_prompt_id_idx").on(table.promptId),
+    tagIdIdx: index("prompt_tag_tag_id_idx").on(table.tagId),
+  })
+);
+
+/**
+ * Vote table schema
+ * Stores user votes (upvote/downvote) on prompts
+ */
+export const vote = pgTable(
+  "vote",
+  {
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    voteType: text("vote_type").$type<"up" | "down">().notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.promptId, table.userId] }),
+    promptIdIdx: index("vote_prompt_id_idx").on(table.promptId),
+    userIdIdx: index("vote_user_id_idx").on(table.userId),
+  })
+);
+
+/**
+ * Saved Prompt table schema
+ * Stores user's bookmarked/saved prompts
+ */
+export const savedPrompt = pgTable(
+  "saved_prompt",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    promptId: text("prompt_id")
+      .notNull()
+      .references(() => prompt.id, { onDelete: "cascade" }),
+    savedAt: timestamp("saved_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.promptId] }),
+    userIdIdx: index("saved_prompt_user_id_idx").on(table.userId),
+    promptIdIdx: index("saved_prompt_prompt_id_idx").on(table.promptId),
+  })
+);
+
+/**
+ * Email verification table for pre-signup OTP verification
+ * Stores hashed OTPs with expiration and attempt tracking
+ * Security: OTPs are hashed using bcrypt, limited to 3 attempts, expire in 5 minutes
+ */
+export const emailVerification = pgTable("email_verification", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull(),
+  otpHash: text("otp_hash").notNull(),
+  attempts: integer("attempts").notNull().default(0),
+  verified: boolean("verified").notNull().default(false),
+  verifiedAt: timestamp("verified_at", { mode: "date" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+});

@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { prompt, user } from "@/db/schema";
+import { prompt, user, promptTag, tag } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth/auth";
 import { headers } from "next/headers";
@@ -47,5 +47,28 @@ export default async function PromptPage({ params }: PromptPageProps) {
     notFound();
   }
 
-  return <PromptDetail prompt={promptData} currentUserId={session?.user.id} />;
+  // Fetch tags for this prompt
+  const promptTags = await db
+    .select({
+      id: tag.id,
+      name: tag.name,
+      slug: tag.slug,
+    })
+    .from(promptTag)
+    .innerJoin(tag, eq(promptTag.tagId, tag.id))
+    .where(eq(promptTag.promptId, id));
+
+  // Combine prompt data with tags
+  const promptWithTags = {
+    ...promptData,
+    tags: promptTags,
+  };
+
+  return (
+    <PromptDetail
+      prompt={promptWithTags}
+      currentUserId={session?.user.id}
+      isAuthenticated={!!session}
+    />
+  );
 }
