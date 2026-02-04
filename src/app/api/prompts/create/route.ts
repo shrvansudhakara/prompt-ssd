@@ -42,24 +42,25 @@ export async function POST(request: NextRequest) {
 
     const userId = session.user.id;
 
-    // Create prompt
     const promptId = crypto.randomUUID();
-    const [newPrompt] = await db
-      .insert(prompt)
-      .values({
-        id: promptId,
-        title,
-        description: description || null,
-        content,
-        imageUrl: imageUrl || null,
-        videoUrl: videoUrl || null,
-        userId,
-      })
-      .returning({ id: prompt.id });
 
-    // Handle tags if provided
-    if (tagNames && tagNames.length > 0) {
-      await db.transaction(async (tx) => {
+    const newPrompt = await db.transaction(async (tx) => {
+      // Create prompt
+      const [created] = await tx
+        .insert(prompt)
+        .values({
+          id: promptId,
+          title,
+          description: description || null,
+          content,
+          imageUrl: imageUrl || null,
+          videoUrl: videoUrl || null,
+          userId,
+        })
+        .returning({ id: prompt.id });
+
+      // Handle tags if provided
+      if (tagNames && tagNames.length > 0) {
         const tagIds: string[] = [];
 
         for (const tagName of tagNames) {
@@ -95,8 +96,10 @@ export async function POST(request: NextRequest) {
             }))
           );
         }
-      });
-    }
+      }
+
+      return created;
+    });
 
     return NextResponse.json({ promptId: newPrompt.id }, { status: 201 });
   } catch (error) {
