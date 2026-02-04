@@ -53,27 +53,20 @@ export async function POST(request: NextRequest) {
     const slug = trimmedName.toLowerCase().replace(/\s+/g, "-");
 
     // Check if tag already exists (case-insensitive)
-    const existingTag = await db
-      .select()
-      .from(tag)
-      .where(sql`LOWER(${tag.slug}) = ${slug}`)
-      .limit(1);
-
-    if (existingTag.length > 0) {
-      return NextResponse.json({ tag: existingTag[0] });
-    }
-
-    // Create new tag
-    const [newTag] = await db
+    const [upsertedTag] = await db
       .insert(tag)
       .values({
         name: trimmedName,
-        slug: slug,
+        slug,
         usageCount: 1,
+      })
+      .onConflictDoUpdate({
+        target: tag.slug,
+        set: { usageCount: sql`${tag.usageCount} + 1` },
       })
       .returning();
 
-    return NextResponse.json({ tag: newTag });
+    return NextResponse.json({ tag: upsertedTag });
   } catch (error) {
     console.error("Error creating tag:", error);
     return NextResponse.json({ error: "Failed to create tag" }, { status: 500 });
