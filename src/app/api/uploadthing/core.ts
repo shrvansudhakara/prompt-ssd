@@ -22,8 +22,10 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Image upload complete for userId:", metadata.userId);
-      console.log("File URL:", file.url);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Image upload complete for userId:", metadata.userId);
+        console.log("File URL:", file.url);
+      }
       return { uploadedBy: metadata.userId, url: file.url };
     }),
 
@@ -40,8 +42,10 @@ export const ourFileRouter = {
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Video upload complete for userId:", metadata.userId);
-      console.log("File URL:", file.url);
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Video upload complete for userId:", metadata.userId);
+        console.log("File URL:", file.url);
+      }
       return { uploadedBy: metadata.userId, url: file.url };
     }),
 } satisfies FileRouter;
