@@ -108,6 +108,8 @@ export default function VoteButtons({
         size="sm"
         onClick={() => handleVote("up")}
         disabled={isLoading}
+        aria-label="Upvote"
+        aria-pressed={voteType === "up"}
         className={cn(
           "hover:bg-green-100 dark:hover:bg-green-900/20",
           voteType === "up" && "bg-green-100 text-green-600 dark:bg-green-900/20"
@@ -123,6 +125,8 @@ export default function VoteButtons({
         size="sm"
         onClick={() => handleVote("down")}
         disabled={isLoading}
+        aria-label="Downvote"
+        aria-pressed={voteType === "down"}
         className={cn(
           "hover:bg-red-100 dark:hover:bg-red-900/20",
           voteType === "down" && "bg-red-100 text-red-600 dark:bg-red-900/20"
