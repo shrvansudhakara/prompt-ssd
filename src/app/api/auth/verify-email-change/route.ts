@@ -50,7 +50,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user's email
-    await db.update(user).set({ email: newEmail }).where(eq(user.id, session.user.id));
+    await db
+      .update(user)
+      .set({ email: newEmail, emailVerified: true })
+      .where(eq(user.id, session.user.id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
