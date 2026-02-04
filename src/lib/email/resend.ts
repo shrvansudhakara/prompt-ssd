@@ -12,7 +12,7 @@ const fromEmail = process.env.RESEND_FROM_EMAIL || "noreply@promptssd.com";
  * @throws Error if email delivery fails
  */
 export async function sendSignupOTP({ email, otp }: { email: string; otp: string }) {
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: `PromptSSD <${fromEmail}>`,
     to: email,
     subject: "Verify Your Email - PromptSSD",
@@ -49,6 +49,11 @@ export async function sendSignupOTP({ email, otp }: { email: string; otp: string
       </html>
     `,
   });
+  if (error) {
+    throw new Error(`Failed to send signup OTP: ${error.message}`);
+  }
+
+  return data;
 }
 
 /**
@@ -60,7 +65,7 @@ export async function sendSignupOTP({ email, otp }: { email: string; otp: string
  * @throws Error if email delivery fails
  */
 export async function sendEmailChangeOTP({ email, otp }: { email: string; otp: string }) {
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: `PromptSSD <${fromEmail}>`,
     to: email,
     subject: "Verify Your New Email - PromptSSD",
@@ -97,6 +102,12 @@ export async function sendEmailChangeOTP({ email, otp }: { email: string; otp: s
       </html>
     `,
   });
+
+  if (error) {
+    throw new Error(`Failed to send email change OTP: ${error.message}`);
+  }
+
+  return data;
 }
 
 /**
@@ -108,7 +119,7 @@ export async function sendEmailChangeOTP({ email, otp }: { email: string; otp: s
  * @throws Error if email delivery fails
  */
 export async function sendPasswordChangeOTP({ email, otp }: { email: string; otp: string }) {
-  await resend.emails.send({
+  const { data, error } = await resend.emails.send({
     from: `PromptSSD <${fromEmail}>`,
     to: email,
     subject: "Change Your Password - PromptSSD",
@@ -145,4 +156,9 @@ export async function sendPasswordChangeOTP({ email, otp }: { email: string; otp
       </html>
     `,
   });
+  if (error) {
+    throw new Error(`Failed to send password change OTP: ${error.message}`);
+  }
+
+  return data;
 }
