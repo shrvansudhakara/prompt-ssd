@@ -22,7 +22,7 @@ export async function POST() {
     const otp = await storeOTP(session.user.email);
 
     // Send email
-    void sendPasswordChangeOTP({ email: session.user.email, otp });
+    await sendPasswordChangeOTP({ email: session.user.email, otp });
 
     return NextResponse.json({ success: true });
   } catch (error) {
