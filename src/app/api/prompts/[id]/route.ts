@@ -120,35 +120,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           processedSlugs.add(slug);
 
           // Find or create tag
-          let tagRecord = await tx
-            .select()
-            .from(tag)
-            .where(sql`LOWER(${tag.slug}) = ${slug}`)
-            .limit(1);
-
-          if (tagRecord.length === 0) {
-            // Create new tag
-            const [newTag] = await tx
-              .insert(tag)
-              .values({
-                name: trimmed,
-                slug: slug,
-                usageCount: 1,
-              })
-              .returning();
-            tagRecord = [newTag];
-          } else {
-            // Increment usage count
-            await tx
-              .update(tag)
-              .set({ usageCount: sql`${tag.usageCount} + 1` })
-              .where(eq(tag.id, tagRecord[0].id));
-          }
+          const [tagRecord] = await tx
+            .insert(tag)
+            .values({
+              name: trimmed,
+              slug: slug,
+              usageCount: 1,
+            })
+            .onConflictDoUpdate({
+              target: tag.slug,
+              set: { usageCount: sql`${tag.usageCount} + 1` },
+            })
+            .returning();
 
           // Create tag association
           await tx.insert(promptTag).values({
             promptId: id,
-            tagId: tagRecord[0].id,
+            tagId: tagRecord.id,
           });
         }
       }
