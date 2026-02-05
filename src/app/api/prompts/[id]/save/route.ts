@@ -17,22 +17,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const { id: promptId } = await params;
 
-    // Check if already saved
-    const existing = await db
-      .select()
-      .from(savedPrompt)
-      .where(and(eq(savedPrompt.userId, session.user.id), eq(savedPrompt.promptId, promptId)))
-      .limit(1);
-
-    if (existing.length > 0) {
-      return NextResponse.json({ message: "Already saved", saved: true });
-    }
-
     // Save the prompt
-    await db.insert(savedPrompt).values({
-      userId: session.user.id,
-      promptId,
-    });
+    await db
+      .insert(savedPrompt)
+      .values({
+        userId: session.user.id,
+        promptId,
+      })
+      .onConflictDoNothing();
 
     return NextResponse.json({ message: "Prompt saved", saved: true });
   } catch (error) {
