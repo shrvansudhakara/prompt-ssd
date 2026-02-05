@@ -75,7 +75,13 @@ export async function POST(request: NextRequest) {
     // Clean up the verification record after successful signup
     await db.delete(emailVerification).where(eq(emailVerification.email, email));
 
-    return NextResponse.json({ success: true, user: responseData }); // Changed
+    // Create response and preserve session headers from Better Auth
+    const response = NextResponse.json({ success: true, user: responseData });
+    signupResponse.headers.forEach((value, key) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
   } catch (error) {
     console.error("Complete signup error:", error);
     return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
