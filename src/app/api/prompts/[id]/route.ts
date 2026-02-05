@@ -75,15 +75,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       if (oldVideoKey) filesToDelete.push(oldVideoKey);
     }
 
-    if (filesToDelete.length > 0) {
-      try {
-        const utapi = new UTApi();
-        await utapi.deleteFiles(filesToDelete);
-      } catch (fileError) {
-        console.error("Failed to delete old files from Uploadthing:", fileError);
-      }
-    }
-
     // Use transaction for atomic updates
     await db.transaction(async (tx) => {
       // Update prompt
@@ -163,6 +154,17 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         }
       }
     });
+
+    // Delete files AFTER successful DB transaction
+    if (filesToDelete.length > 0) {
+      try {
+        const utapi = new UTApi();
+        await utapi.deleteFiles(filesToDelete);
+      } catch (fileError) {
+        console.error("Failed to delete old files from Uploadthing:", fileError);
+        // File deletion failed but DB is consistent, files are orphaned but harmless
+      }
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -244,6 +246,26 @@ export async function DELETE(
     if (imageKey) filesToDelete.push(imageKey);
     if (videoKey) filesToDelete.push(videoKey);
 
+    // Use transaction for atomic updates
+    await db.transaction(async (tx) => {
+      // Get tags to decrement usage count before deletion
+      const promptTags = await tx
+        .select({ tagId: promptTag.tagId })
+        .from(promptTag)
+        .where(eq(promptTag.promptId, id));
+
+      // Decrement usage count for associated tags
+      for (const pt of promptTags) {
+        await tx
+          .update(tag)
+          .set({ usageCount: sql`GREATEST(${tag.usageCount} - 1, 0)` })
+          .where(eq(tag.id, pt.tagId));
+      }
+
+      // Delete prompt from database (cascade will delete promptTag associations)
+      await tx.delete(prompt).where(eq(prompt.id, id));
+    });
+
     if (filesToDelete.length > 0) {
       try {
         const utapi = new UTApi();
@@ -253,23 +275,6 @@ export async function DELETE(
         // Continue with DB deletion even if file deletion fails
       }
     }
-
-    // Get tags to decrement usage count before deletion
-    const promptTags = await db
-      .select({ tagId: promptTag.tagId })
-      .from(promptTag)
-      .where(eq(promptTag.promptId, id));
-
-    // Decrement usage count for associated tags
-    for (const pt of promptTags) {
-      await db
-        .update(tag)
-        .set({ usageCount: sql`GREATEST(${tag.usageCount} - 1, 0)` })
-        .where(eq(tag.id, pt.tagId));
-    }
-
-    // Delete prompt from database (cascade will delete promptTag associations)
-    await db.delete(prompt).where(eq(prompt.id, id));
 
     return NextResponse.json({ success: true });
   } catch (error) {
