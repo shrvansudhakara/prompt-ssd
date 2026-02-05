@@ -64,17 +64,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     // Delete old files if they're being replaced
     const filesToDelete: string[] = [];
-
-    if (existingPrompt.imageUrl && imageUrl !== existingPrompt.imageUrl) {
+    const nextImageUrl = imageUrl === undefined ? existingPrompt.imageUrl : imageUrl || null;
+    const nextVideoUrl = videoUrl === undefined ? existingPrompt.videoUrl : videoUrl || null;
+    if (existingPrompt.imageUrl && nextImageUrl !== existingPrompt.imageUrl) {
       const oldImageKey = extractFileKey(existingPrompt.imageUrl);
       if (oldImageKey) filesToDelete.push(oldImageKey);
     }
-
-    if (existingPrompt.videoUrl && videoUrl !== existingPrompt.videoUrl) {
+    if (existingPrompt.videoUrl && nextVideoUrl !== existingPrompt.videoUrl) {
       const oldVideoKey = extractFileKey(existingPrompt.videoUrl);
       if (oldVideoKey) filesToDelete.push(oldVideoKey);
     }
-
     // Use transaction for atomic updates
     await db.transaction(async (tx) => {
       // Update prompt
@@ -84,8 +83,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
           title,
           description: description || null,
           content,
-          imageUrl: imageUrl || null,
-          videoUrl: videoUrl || null,
+          imageUrl: nextImageUrl,
+          videoUrl: nextVideoUrl,
         })
         .where(eq(prompt.id, id));
 
