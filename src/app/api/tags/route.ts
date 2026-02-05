@@ -42,8 +42,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name } = await request.json();
-
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+      }
+      throw error;
+    }
+    const { name } = (body ?? {}) as { name?: unknown };
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json({ error: "Tag name is required" }, { status: 400 });
     }
@@ -52,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Create case-insensitive slug (lowercase, spaces to hyphens)
     const slug = trimmedName.toLowerCase().replace(/\s+/g, "-");
 
-    // Check if tag already exists (case-insensitive)
+    // Upsert tag
     const [upsertedTag] = await db
       .insert(tag)
       .values({
