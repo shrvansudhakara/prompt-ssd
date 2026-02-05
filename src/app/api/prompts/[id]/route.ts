@@ -103,7 +103,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         for (const oldTag of oldTags) {
           await tx
             .update(tag)
-            .set({ usageCount: sql`${tag.usageCount} - 1` })
+            .set({ usageCount: sql`GREATEST(${tag.usageCount} - 1, 0)` })
             .where(eq(tag.id, oldTag.tagId));
         }
 
