@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
 
       // Handle tags if provided
       if (tagNames && tagNames.length > 0) {
+        const processedSlugs = new Set<string>();
         const tagIds: string[] = [];
 
         for (const tagName of tagNames) {
@@ -69,6 +70,10 @@ export async function POST(request: NextRequest) {
 
           // Create case-insensitive slug
           const slug = trimmedName.toLowerCase().replace(/\s+/g, "-");
+
+          // Skip if already processed this slug
+          if (processedSlugs.has(slug)) continue;
+          processedSlugs.add(slug);
 
           // Check if tag exists (case-insensitive)
           const [upsertedTag] = await tx
