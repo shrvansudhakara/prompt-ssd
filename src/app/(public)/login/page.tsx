@@ -16,8 +16,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
   const [error, setError] = useState<string>("");
+  const router = useRouter();
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -44,6 +47,8 @@ export default function LoginPage() {
       setError(error.message || "Invalid credentials");
       return;
     }
+
+    router.push("/feed");
   };
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
