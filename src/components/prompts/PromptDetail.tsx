@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface PromptDetailProps {
   prompt: {
@@ -63,9 +64,14 @@ export default function PromptDetail({
   const router = useRouter();
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(prompt.content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(prompt.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      toast.error("Failed to copy to clipboard");
+    }
   };
 
   const handleDelete = async () => {
