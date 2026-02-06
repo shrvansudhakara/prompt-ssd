@@ -105,7 +105,7 @@ export default function PromptDetail({
                 {prompt.tags && prompt.tags.length > 0 && (
                   <div className="mt-3 flex flex-wrap gap-2">
                     {prompt.tags.map((tag) => (
-                      <Link key={tag.id} href={`/feed?tags=${tag.id}`}>
+                      <Link key={tag.id} href={`/feed?tags=${tag.slug}`}>
                         <Badge variant="secondary" className="hover:bg-secondary/80 cursor-pointer">
                           {tag.name}
                         </Badge>
