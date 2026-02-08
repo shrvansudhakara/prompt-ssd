@@ -24,6 +24,7 @@ function CompleteSignupContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
   const [error, setError] = useState<string>("");
+  const [isValidating, setIsValidating] = useState(true);
 
   const form = useForm<CompleteSignupInput>({
     resolver: zodResolver(completeSignupSchema),
@@ -41,7 +42,15 @@ function CompleteSignupContent() {
 
     if (!email || verifiedEmail !== email) {
       router.push("/signup");
+      return;
     }
+
+    // Use setTimeout to defer state update
+    const timer = setTimeout(() => {
+      setIsValidating(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [email, router]);
 
   const onSubmit = async (values: CompleteSignupInput) => {
@@ -82,7 +91,8 @@ function CompleteSignupContent() {
     }
   };
 
-  if (!email) {
+  // Show nothing while validating
+  if (isValidating) {
     return null;
   }
 
