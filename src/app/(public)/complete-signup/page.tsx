@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { authClient } from "@/lib/auth/auth-client";
 
 function CompleteSignupContent() {
   const router = useRouter();
@@ -66,6 +67,13 @@ function CompleteSignupContent() {
 
       // Clear verification flag
       sessionStorage.removeItem("emailVerified");
+
+      // Sign in the user using Better Auth to update session state
+      await authClient.signIn.email({
+        email: email,
+        password: values.password,
+        callbackURL: "/feed",
+      });
 
       router.push("/feed");
     } catch (err) {
