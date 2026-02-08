@@ -65,15 +65,15 @@ function CompleteSignupContent() {
         return;
       }
 
-      // Clear verification flag
-      sessionStorage.removeItem("emailVerified");
-
       // Sign in the user using Better Auth to update session state
       await authClient.signIn.email({
         email: email,
         password: values.password,
         callbackURL: "/feed",
       });
+
+      // Clear verification flag
+      sessionStorage.removeItem("emailVerified");
 
       router.push("/feed");
     } catch (err) {
