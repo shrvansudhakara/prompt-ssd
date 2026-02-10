@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import QueryProvider from "@/components/providers/QueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,13 +21,13 @@ const geistMono = Geist_Mono({
  * Defines the page title and description for SEO
  */
 export const metadata: Metadata = {
-  title: "PromptSSD - Coming Soon",
+  title: "PromptSSD - Share, Discover & Reference AI Prompts",
   description: "A community-driven platform for sharing, discovering, and referencing AI prompts.",
 };
 
 /**
  * Root layout component that wraps all pages
- * Configures global fonts, styling, and dark theme
+ * Configures global fonts, styling, dark theme, and layout structure
  *
  * @param {Object} props - Component properties
  * @param {React.ReactNode} props.children - Child components to render
@@ -37,7 +41,14 @@ export default function RootLayout({
   // TODO: Implement dynamic theme switching when adding user preferences
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <QueryProvider>
+          <Navbar />
+          <main className="min-h-screen pt-16">{children}</main>
+          <Footer />
+        </QueryProvider>
+        <Toaster />
+      </body>
     </html>
   );
 }
